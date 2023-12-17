@@ -20,9 +20,7 @@ data = {
 
 response = requests.post(url, headers=headers, data=data)
 
-print("Headers:")
-for key, value in response.headers.items():
-    print(f"{key}: {value}")
+
 
 if data:
     first_key = next(iter(data))
