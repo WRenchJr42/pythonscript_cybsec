@@ -1,58 +1,38 @@
+import requests
+import re
 
-import urllib.error
-from urllib import request as rq
-from bs4 import BeautifulSoup
+url = 'http://testphp.vulnweb.com/search.php?test=query'
+headers = {
+    'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+    'Accept-Language': 'en-US,en;q=0.5',
+    'Accept-Encoding': 'gzip, deflate, br',
+    'Content-Type': 'application/x-www-form-urlencoded',
+    'Origin': 'http://testphp.vulnweb.com',
+    'Referer': 'http://testphp.vulnweb.com/search.php?test=query',
+    'Upgrade-Insecure-Requests': '1',
+}
 
-class funny:
-    def __init__(self):
-        try:
-            self.url = str(input("\nEnter a URL : "))
-        except Exception as x:
-            print(f'ERROR : {x}')
+data = {
+    'searchFor': 'flowers',
+    'goButton': 'go',
+}
 
-    def game(self):
-        print(f"\n Working on URL : {self.url}")
-        elements = {}
-        print("There are two things that are pivotal in this case:" +
-              "\n 3 : The path"
-              "\n 1 : The element that is searching for the the word"
-              "\n 2 : The word that is getting searched"
-              '\n\n You can, however, search multiple for multiple things in a webpage with this option.')
-        path = input('\n\n Path (no need for placing "/" in the beginning):')
-        while True:
-            searching = input("\n\nEnter the searching element (Press 'q' to come out of "
-                              "the loop) : ")
+response = requests.post(url, headers=headers, data=data)
 
-            if searching.lower() == 'q':
-                break
-            searched = input("\nEnter the word / element to be searched : ")
+print("Headers:")
+for key, value in response.headers.items():
+    print(f"{key}: {value}")
 
-            elements[searching] = searched
-        print(f"\n\nResulting pairs are : {elements}")
-        print("\n Proceeding further...")
-        url = self.url + '/' + path
+if data:
+    first_key = next(iter(data))
+    first_value = data[first_key]
+    print(f"Key: {first_key}, Value: {first_value}")
 
-        encoded_data = urllib.parse.urlencode(elements).encode('utf-8')
-        read = rq.urlopen(url, data=encoded_data)
-        result = read.read().decode('utf-8')
-        print(result)
-        html_data = result
-        soup = BeautifulSoup(html_data, 'html.parser')
-
-        lines = soup.get_text().split('\n')
-
-        for key, value in elements.items():
-            print(f"\nResults for '{key}':")
-            for line in lines:
-                if key in line:
-                    print(line.strip())
-
-            print(f"\nResults for '{value}':")
-            for line in lines:
-                if value in line:
-                    print(line.strip())
-
-
-if __name__ == '__main__':
-    probe = funny()
-    probe.game()
+    searched_term_match = re.search(re.escape(first_value), response.text)
+    if searched_term_match:
+        print(f"\n\nSearched Term : {searched_term_match.group()}")
+    else:
+        print(f"Searched term '{first_value}' not found in the response.")
+else:
+    print("No data to process.")
