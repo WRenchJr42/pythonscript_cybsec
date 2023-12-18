@@ -1,6 +1,16 @@
+import re
 import requests
 
-url = "http://172.105.62.194:8000/login"
+def get_csrf_token(html_content):
+    match = re.search(r'<meta name="csrf-token" content="([^"]+)"', html_content)
+    return match.group(1) if match else None
+
+url_first_program = "http://172.105.62.194:8000/login"
+response_first_program = requests.get(url_first_program)
+html_content_first_program = response_first_program.text
+csrf_token = get_csrf_token(html_content_first_program)
+
+url_second_program = "http://172.105.62.194:8000/login"
 headers = {
     'Host': '172.105.62.194:8000',
     'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0',
@@ -11,25 +21,21 @@ headers = {
     'Origin': 'http://172.105.62.194:8000',
     'Connection': 'close',
     'Referer': 'http://172.105.62.194:8000/login',
-    'Cookie': 'laravel_session=eyJpdiI6ImtOV2YrSkg4T2g2NEd1UzlpTXphVmc9PSIsInZhbHVlIjoibmRROEVWSHlRaXZnY0R0ZkQvQ0JQUWExUVBGdzBDRzBUZTMvK3RETWhwaDFzbHJYcXFyb011VWhWU3JkWWl2RDgzb05SZFluNG45NTlxSDJ0SUUxQjVBM1RYazh0N2JhUWk4K2tJbFlPeTdpZ0VnRTB4S0dxK0tpc1JKalBSSEIiLCJtYWMiOiI4ZTk0MTNhNzVhMWQ1NWE2MzM3MTJiOGIxOTQ5NDUwNTcwNWZhNjE1YTIwOTM1YzZhODc2ZDJlZDgwNWZkOGExIiwidGFnIjoiIn0%3D; XSRF-TOKEN=eyJpdiI6IkpldSt6c3ZBL0xldTl6elpvbGs1cXc9PSIsInZhbHVlIjoiZmZXbm5tSDIwd0liZ0doRzVEZEJWbGJlREJvVFA5MHE1RE9lYys3alFLT0s2ZktqbWhtalYrUng3eHFFdGNXRnJuNEovVXo4aXhxd3pNOENBYlFLd0p3S0FBQkN1OFE5dlMxaCtiTW1RRlhUTzB6eitGSU56aE04OG83REF2ak4iLCJtYWMiOiI1NDQyY2FlNTNmMWRhOWJmNTMyOWQ5NWYxMzFjYjE0MzY5MWFhOWUzNDMyYTI1MThmY2JhNzgwNWJjN2UyMmI4IiwidGFnIjoiIn0%3D',
+    'Cookie': f'laravel_session={response_first_program.cookies.get("laravel_session")}; XSRF-TOKEN={csrf_token}',
     'Upgrade-Insecure-Requests': '1'
 }
 
 payload = {
-    '_token': 'Chwh3Mzc6JaREv6FyDJW6QToHcExdhwRs6TIrwHM',
+    '_token': csrf_token,
     'username': 'test1',
     'password': 'password',
     'submit': ''
 }
 
-response = requests.post(url, headers=headers, data=payload)
+response_second_program = requests.post(url_second_program, headers=headers, data=payload)
 
-if response.status_code == 200:
+if response_second_program.status_code == 200:
     print("Login successful!")
-
-    print("Cookies:", response.cookies.get_dict())
-
-
+    print("Cookies:", response_second_program.cookies.get_dict())
 else:
-    print(f"Login failed with status code {response.status_code}")
-
+    print(f"Login failed with status code {response_second_program.status_code}")
