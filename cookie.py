@@ -1,5 +1,6 @@
 import re
 import requests
+from bs4 import BeautifulSoup
 
 def get_csrf_token(html_content):
     match = re.search(r'<meta name="csrf-token" content="([^"]+)"', html_content)
@@ -34,10 +35,16 @@ payload = {
 
 fire = requests.post(url, headers=headers, data=payload)
 
-if "Welcome" or "Logout" in fire.text:
+if "Welcome" in fire.text:
 
     print("Login successful!")
     print("Cookies:", fire.cookies.get_dict())
+
+    soup = BeautifulSoup(fire.text, 'html.parser')
+    dropdown_menu = soup.find('ul', class_='dropdown-menu scrollable-menu')
+    names = [item.text.strip() for item in dropdown_menu.find_all('a')]
+    print(names)
     #print(fire.text)
+
 else:
     print(f"Login failed with status code {fire.status_code}")
