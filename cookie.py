@@ -22,7 +22,7 @@ headers = {
     'Origin': 'http://172.105.62.194:8000',
     'Connection': 'close',
     'Referer': 'http://172.105.62.194:8000/login',
-    'Cookie': f'laravel_session={resp.cookies.get("laravel_session")}; XSRF-TOKEN={csrf_token}',
+    'Cookie': f'laravel_session={resp.cookies.get("laravel_session")}; XSRF-TOKEN={resp.cookies.get("XSRF-TOKEN")}',
     'Upgrade-Insecure-Requests': '1'
 }
 
