@@ -35,7 +35,7 @@ payload = {
 
 fire = requests.post(url, headers=headers, data=payload)
 
-if "Welcome" in fire.text:
+if "302" in fire.text:
 
     print("Login successful!")
     print("Cookies:", fire.cookies.get_dict())
